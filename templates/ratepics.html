@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+    <head>
+        <style type="text/css">
+            form, body, html {width:100%;}
+            div{width:100%; display:inline-block}
+            span{display:inline-block;border: 2px black;border-style:solid;
+                padding:5px 5px; border-radius: 50%;}
+            img{image-orientation: from-image; width:85%}
+        </style>
+    </head>
+    <body>
+        <h1>Order these images</h1>
+        <form action="/hair" method='POST'>
+            {% for date, images in imagedict.iteritems() %}
+                {% if images is string %}
+                    <div>
+                        <img src='{{ images }}' />
+                        <input type="hidden" name='{{ date }}' value='{{ loop.index }}' />
+                        <div class="rater">
+                            <span class="up">Up</span></br>
+                            <span class="down">Dn</span></br>
+                        </div>
+                    </div>
+                {% else %}
+                    <div>
+                        {% for image in images %}
+                            <img src='{{ image }}' style="width:{{ 100/(loop.length+1) - 1 }}%" />
+                        {% endfor %}
+                        <div class="rater" style="width:{{ 100/(images|length + 1) -1 }}%">
+                            {% for n in range(1,count+1) %}
+                            <label>{{n}}:</label> 
+                            <input type="radio" name='{{ date }}' value='{{n}}' /><br />
+                            {% endfor%}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+                <input type="submit"/>
+        </form>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $('.up').click(function () {
+                    var current = $(this).parent().parent();
+                    var val = parseInt(current.children("input").val(), 10);
+                    if (val > 0) {
+                        var previous = current.prev();
+                        current.fadeOut(200).detach().insertBefore(previous).fadeIn(200);
+                        current.children("input").val(val - 1);
+                        previous.children("input").val(val);
+                    }
+                });
+
+                $('.down').click(function () {
+                    var current = $(this).parent().parent();
+                    var val = parseInt(current.children("input").val(), 10);
+                    if (val < {{ imagedict|length }}) {
+                        var next = current.next();
+                        current.fadeOut(200).detach().insertAfter(next).fadeIn(200);
+                        current.children("input").val(val + 1);
+                        next.children("input").val(val);
+                    }
+                });
+            });
+            $.fn.redraw = function(){
+              $(this).each(function(){
+                var redraw = this.offsetHeight;
+              });
+            };
+        </script>
+    </body>
+</html>
